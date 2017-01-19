@@ -1,0 +1,3 @@
+==11214== NVPROF is profiling process 11214, command: ./streams -n 50 -s 1000000 --shuffle --non-unified-same
+==11214== Generated result file: /gpfs/home/bsc15/bsc15005/Streams-benchmarks/non-unified-same.nvvp
+======== Error: Application received signal 11

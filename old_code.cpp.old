@@ -1,0 +1,60 @@
+if(kernels_remain){	
+			kernels_remain = false;
+			//Submit kernels
+			for(int i = 0; i < count; ++i){
+				// Check if kernel is submitted
+				if(! ksubmitted[ korder[i] ] ){
+					//Check if cpyin has finished
+					if(cudaEventQuery(inevents[ korder[i] ]) == cudaSuccess){
+						ksubmitted[ korder[i] ] = true;
+						
+						assign_order( device_objects[ korder[i] ], gridSize, blockSize, kstreams[curr_kstream]);
+
+						//Submit event
+						cudaEventRecord(kevents[ korder[i] ], kstreams[curr_kstream]);
+					
+						//Update current stream
+						curr_kstream = ( curr_kstream + 1 ) % stream_count;
+						
+						char str[10];
+						sprintf(str, "Kernel %d", korder[i]);
+						nvtxMarkA(str);
+
+					} else {
+						kernels_remain = true;
+					}
+				}
+			}
+		}
+
+		if(cpyouts_remain){
+			cpyouts_remain = false;
+			//Submit cpyouts
+			for(int i = 0; i < count; ++i){
+				//Check if cpyout is submitted
+				if(!outsubmitted[ outorder[i] ]){
+					//Check if kernel has finished
+					if(cudaEventQuery( kevents[ outorder[i] ] ) == cudaSuccess){
+						
+						outsubmitted[ outorder[i] ] = true;
+						
+						//Submit cpyout
+						cudaMemcpyAsync(
+							host_objects[ outorder[i] ],
+							device_objects[ inorder[i] ],
+							size * sizeof(int),
+							cudaMemcpyDeviceToHost,
+							tstreams[ out_tstream ]);
+						
+						cudaEventRecord(outevents[ outorder[i] ], tstreams[out_tstream]);
+
+						char str[10];
+						sprintf(str, "Output %d", outorder[i]);
+						nvtxMarkA(str);
+	
+					}
+
+				}
+			}
+		}
+

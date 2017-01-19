@@ -1,0 +1,12 @@
+Running Stream Benchmark
+	Object size: 1000000
+	Number of Objects: 50
+	Number of Streams: 10
+	Shuffle: yes
+	GPU: Tesla K80
+	Block Size: 1024
+	Grid Size: 977
+	Mode: 
+		Separate memory 
+		synchonization using streams
+Total time: 0
