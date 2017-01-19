@@ -1,12 +1,18 @@
 #include "benchmarks.hpp" 
 #include <iostream>	
 
-#include <time.h>
+#include <chrono>
 
 #include "cuda_profiler_api.h"
 #include "../kernels.h"
 
+using namespace std;
+using namespace std::chrono;
+
 void run_non_unified_same(int size, int count, int stream_count, int shuffle, int gridSize, int blockSize){
+	high_resolution_clock::time_point t1;
+	high_resolution_clock::time_point t2;
+
 	int **host_objects = host_alloc(size, count);
 	int **device_objects = device_alloc(size, count);
 	
@@ -23,7 +29,7 @@ void run_non_unified_same(int size, int count, int stream_count, int shuffle, in
 
 	cudaProfilerStart();
 	
-	start_t = clock();
+	t1 = high_resolution_clock::now();
 
 	for(int i = 0; i < count; ++i){
 		cudaMemcpyAsync(
@@ -55,12 +61,12 @@ void run_non_unified_same(int size, int count, int stream_count, int shuffle, in
 
 	cudaDeviceSynchronize();
 	
-	end_t = clock();
+	t2 = high_resolution_clock::now();
 
 	cudaProfilerStop();
 
-	total_t = (double) (end_t - start_t) / CLOCKS_PER_SEC;
-	std::cout << "Total time: " << total_t << std::endl;
+	auto duration = duration_cast<microseconds>( t2 - t1 ).count();
+	cout << "Duration: " << duration << "us" << endl;
 
 	free_sequence(order);
 
@@ -68,7 +74,7 @@ void run_non_unified_same(int size, int count, int stream_count, int shuffle, in
 	free_events(count, outevents);
 	free_events(count, kevents);
 	
-	free_streams(count, streams);
+	free_streams(stream_count, streams);
 
 	host_free(count, host_objects);
 	device_free(count, device_objects);

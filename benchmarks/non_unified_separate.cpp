@@ -122,7 +122,7 @@ void run_non_unified_separate(int size, int count, int stream_count, int shuffle
 	free_events(count, outevents);
 	free_events(count, kevents);
 	
-	free_streams(count, kstreams);
+	free_streams(stream_count, kstreams);
 	free_streams(2, tstreams);
 
 	host_free(count, host_objects);
